@@ -1,10 +1,13 @@
 ---
 - include: install.yml
+  become: true
   tags: [telegraf, install]
 
 - include: configure.yml
+  become: true
   tags: [telegraf, configure]
 
 - include: start.yml
+  become: true
   tags: [telegraf, start]
   when: telegraf_start_service
