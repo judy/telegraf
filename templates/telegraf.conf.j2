@@ -139,6 +139,9 @@
 #                                  PLUGINS                                    #
 ###############################################################################
 
+{% if telegraf_plugins_custom is defined and telegraf_plugins_custom != None %}
+{{ telegraf_plugins_custom }}
+{% else %}
 {% for plugin in telegraf_plugins %}
 [[inputs.{{ plugin.name }}]]
 {% if plugin.options is defined %}
@@ -181,6 +184,7 @@
 {% endfor %}
 {% endif %}
 {% endfor %}
+{% endif %}
 
 ###############################################################################
 #                              service PLUGINS                                #
