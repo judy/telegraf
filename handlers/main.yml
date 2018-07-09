@@ -7,6 +7,11 @@
   become: true
   when: telegraf_start_service
 
+- name: windows restart telegraf
+  win_shell: "try { net stop telegraf } finally { net start telegraf }"
+  register: win_net_stopped
+  when: telegraf_start_service
+
 - name: pause
   pause:
     seconds: "{{telegraf_start_delay}}"
@@ -19,6 +24,15 @@
   ignore_errors: yes
   register: telegraf_service_status
   become: true
+  when: telegraf_start_service
+
+# Telegraf handles its own service running somehow, skipping nssm or windows
+# services. We have to check it this way.
+- name: windows check status
+  win_shell: if((Get-Service telegraf).status -ne "Running") { throw "Not Running" }
+  ignore_errors: true
+  warn: False
+  register: telegraf_service_status
   when: telegraf_start_service
 
 - name: assert running

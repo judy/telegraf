@@ -1,0 +1,72 @@
+---
+- name: See if telegraf is already installed
+  win_shell: sc.exe query telegraf
+  register: telegraf_windows_installed
+  ignore_errors: yes
+
+- name: See if installed telegraf needs to be updated
+  win_shell: "{{ telegraf_binary_windows }} --version"
+  register: telegraf_windows_old
+  when:
+  - telegraf_windows_installed is defined
+  - telegraf_windows_installed.rc == 0
+
+- set_fact:
+    install_telegraf: "{{ telegraf_windows_installed is not defined or telegraf_windows_installed.rc != 0 }}"
+    upgrade_telegraf: "{{ telegraf_windows_old.stdout is defined and telegraf_windows_old.stdout.find(telegraf_windows_version) == -1 }}"\
+
+- name: If telegraf needs to be updated, turn it off so installation can proceed
+  win_shell: "{{ telegraf_binary_windows }} --service uninstall --config {{ telegraf_configuration_windows }}"
+  ignore_errors: true
+  when: upgrade_telegraf
+
+- block:
+    - name: Clean old installation directory
+      win_file:
+        path: "{{ telegraf_windows_path }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: Create installation directory
+      win_file:
+        path: "{{ telegraf_windows_path }}"
+        state: directory
+
+    - name: Create temp directory
+      win_file:
+        path: "/tmp"
+        state: directory
+
+    # Download locally first in order to checksum the file
+    - name: Get Windows installer
+      get_url:
+        url: "{{ telegraf_releases_url }}/{{ telegraf_windows_file}}"
+        checksum: "{{ telegraf_windows_file_checksum }}"
+        dest: "/tmp/{{ telegraf_windows_file}}"
+      delegate_to: localhost
+      run_once: true
+
+    - name: Copy zip file over to windows box
+      win_copy:
+        src: "/tmp/{{ telegraf_windows_file }}"
+        dest: "/tmp/{{ telegraf_windows_file }}"
+
+    - name: Unzip the installer
+      win_unzip:
+        src: "/tmp/{{ telegraf_windows_file}}"
+        dest: "/tmp/" # has a 'telegraf' root folder
+
+    - name: Copy executable into place
+      win_copy:
+        remote_src: true
+        src: /tmp/telegraf/telegraf.exe
+        dest: "{{ telegraf_binary_windows }}"
+
+    - name: Install telegraf as a service
+      win_shell: "{{ telegraf_binary_windows }} --service install --config {{ telegraf_configuration_windows }}"
+      notify:
+        - "windows restart telegraf"
+        - "pause"
+        - "windows check status"
+        - "assert running"
+  when: install_telegraf or upgrade_telegraf

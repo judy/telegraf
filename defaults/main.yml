@@ -2,12 +2,23 @@
 # Channel of Telegraf to install
 telegraf_install_version: stable
 
+# Windows Versions
+telegraf_releases_url: https://dl.influxdata.com/telegraf/releases
+telegraf_windows_version: "1.7.1"
+telegraf_windows_file: telegraf-1.7.1_windows_amd64.zip
+telegraf_windows_file_checksum: sha256:b2f60d3bd9fa5a2183887edce312ec5dcead6899e07326925b2ecf358c263530
+
 # The user and group telegraf should run under (should be set to telegraf unless needed otherwise)
 telegraf_runas_user: telegraf
 telegraf_runas_group: telegraf
 
 # Configuration Template
 telegraf_configuration_template: telegraf.conf.j2
+
+# File locations
+telegraf_windows_path: "/bin/telegraf"
+telegraf_binary_windows: "{{ telegraf_windows_path }}/telegraf.exe"
+telegraf_configuration_windows: "{{ telegraf_windows_path }}/telegraf.conf"
 
 # Configuration Variables
 telegraf_tags:
@@ -44,6 +55,8 @@ telegraf_influxdb_username:
 telegraf_influxdb_password:
 telegraf_influxdb_user_agent:
 telegraf_influxdb_udp_payload:
+
+telegraf_plugins_custom:
 
 telegraf_plugins_base:
   - name: mem

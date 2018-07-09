@@ -1,0 +1,19 @@
+---
+- name: Set templatized Telegraf configuration
+  win_template:
+    src: telegraf.conf.j2
+    dest: "{{ telegraf_configuration_windows }}"
+  when: telegraf_template_configuration
+  # If config changes, restart telegraf and confirm it remained running
+  notify:
+    - "windows restart telegraf"
+    - "pause"
+    - "windows check status"
+    - "assert running"
+
+# - name: Check configuration
+#   win_shell: "{{ telegraf_binary_windows }} --config {{ telegraf_configuration_windows }} --test"
+#   register: telegraf_configuration_test_output
+#
+# - debug:
+#     var: telegraf_configuration_test_output

@@ -1,6 +1,11 @@
 ---
 - import_tasks: install-redhat.yml
+  become: true
   when: ansible_os_family == "RedHat"
 
 - import_tasks: install-debian.yml
+  become: true
   when: ansible_os_family == "Debian"
+
+- import_tasks: install-windows.yml
+  when: ansible_os_family == "Windows"

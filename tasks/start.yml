@@ -10,3 +10,22 @@
     - "check status"
     - "assert running"
   become: true
+  when: ansible_os_family != "Windows"
+
+- block:
+    - name: Check if Telegraf is running currently
+      win_shell: Get-Service telegraf | ConvertTo-Json -depth 1
+      register: telegraf_running
+
+    - name: Stop Telegraf first if it's running
+      win_shell: net stop telegraf
+      when: (telegraf_running.stdout | from_json).Status == 4
+      ignore_errors: yes
+
+    - name: Start the Telegraf service
+      win_shell: net start telegraf
+      notify:
+        - "pause"
+        - "windows check status"
+        - "assert running"
+  when: ansible_os_family == "Windows"

@@ -1,13 +1,10 @@
 ---
 - import_tasks: install.yml
-  become: true
   tags: [telegraf, install]
 
 - import_tasks: configure.yml
-  become: true
   tags: [telegraf, configure]
 
-- import_tasks: start.yml
-  become: true
+- include: start.yml
   tags: [telegraf, start]
   when: telegraf_start_service
