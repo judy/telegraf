@@ -1,0 +1,14 @@
+---
+- name: Stop telegraf as a service
+  win_shell: "net stop telegraf"
+  ignore_errors: yes
+
+- name: Uninstall telegraf as a service
+  win_shell: "{{ telegraf_binary_windows }} --service uninstall"
+  ignore_errors: yes
+
+- name: Clean old installation directory
+  win_file:
+    path: "{{ telegraf_windows_path }}"
+    state: absent
+  ignore_errors: yes
