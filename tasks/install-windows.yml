@@ -13,7 +13,7 @@
 
 - set_fact:
     install_telegraf: "{{ telegraf_windows_installed is not defined or telegraf_windows_installed.rc != 0 }}"
-    upgrade_telegraf: "{{ telegraf_windows_old.stdout is defined and telegraf_windows_old.stdout.find(telegraf_windows_version) == -1 }}"\
+    upgrade_telegraf: "{{ telegraf_windows_old.stdout is defined and telegraf_windows_old.stdout.find(telegraf_windows_version) == -1 }}"
 
 - name: If telegraf needs to be updated, turn it off so installation can proceed
   win_shell: "{{ telegraf_binary_windows }} --service uninstall --config {{ telegraf_configuration_windows }}"
